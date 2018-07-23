@@ -16,9 +16,19 @@ import logging
 
 logging.basicConfig(level=logging.ERROR)
 
-def run_command(cmd):
-	logging.info("running %s" % cmd)
-	os.system(cmd)
+def walker(dir):
+    rv=[]
+    for root, dirs, files in os.walk(dir):
+        for file in files:
+          rv.append(os.path.join(root, file))
+    rv.sort()
+    return '"%s"'%'" "'.join(rv)
+                                
+def run_command(cmd,nice=-9):
+    if nice: cmd="nice -n %d %s"%(nice,cmd)
+    logging.info("running %s" % cmd)
+    import ipdb; ipdb.set_trace()
+    os.system(cmd)
 
 def main(args=None):
 	for source_file in args.source_files:
@@ -31,7 +41,8 @@ def main(args=None):
 			z.close()
 		
 		print 'Creating "%s"...' % output_filename
-		run_command('convert %s/*.jpg "%s"' % (extract_folder, output_filename))
+		#run_command('convert %s/*.jpg "%s"' % (extract_folder, output_filename))
+        run_command('convert %s "%s"' % (walker(extract_folder), output_filename))
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description='Convert a cbz file to a pdf')
@@ -40,3 +51,8 @@ if __name__ == "__main__":
 	args = parser.parse_args()
 	
 	sys.exit(main(args))
+#
+#Local Variables:
+#tab-width: 4
+#End:
+#
